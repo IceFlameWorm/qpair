@@ -1,3 +1,5 @@
+import os
+
 DATA_SET_PATH = "/root/mounted/datasets/contest_data/"
 KN_CSV = os.path.join(DATA_SET_PATH, "knowledge.csv")
 TRAIN_CSV = os.path.join(DATA_SET_PATH, "train.csv")
