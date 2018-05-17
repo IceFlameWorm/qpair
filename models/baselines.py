@@ -5,7 +5,7 @@ import pandas as pd
 import pickle
 import datetime, time, json
 from keras.models import Model
-from keras.layers import Input, TimeDistributed, Dense, Lambda, concatenate, Dropout, BatchNormalization
+from keras.layers import Input, TimeDistributed, Dense, Lambda, concatenate, Dropout, BatchNormalization, Bidirectional, LSTM, dot, Flatten, Reshape, add
 from keras.layers.embeddings import Embedding
 from keras.regularizers import l2
 from keras.callbacks import Callback, ModelCheckpoint
@@ -19,9 +19,9 @@ def MODEL_WEM():
 
 
     with open(WEM_PKL, 'rb') as f:
-        wamp = pickle.load(f)
+        wmap = pickle.load(f)
 
-    wem = wamp['embedding_matrix']
+    wem = wmap['embedding_matrix']
 
     question1 = Input(shape=(MAX_WSEQ_LEN,))
     question2 = Input(shape=(MAX_WSEQ_LEN,))
@@ -58,6 +58,58 @@ def MODEL_WEM():
     model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
     return model
 
+
+def MODEL_WEM_ATTENTION():
+    DROPOUT = 0.1
+    SENT_EMBEDDING_DIM = 128
+
+
+    with open(WEM_PKL, 'rb') as f:
+        wmap = pickle.load(f)
+
+    wem = wmap['embedding_matrix']
+
+    question1 = Input(shape=(MAX_WSEQ_LEN,))
+    question2 = Input(shape=(MAX_WSEQ_LEN,))
+
+    q1 = Embedding(WORDS_NUM + 1, WORD_EMBEDDING_DIM, weights=[wem],
+                   input_length=MAX_WSEQ_LEN,
+                   trainable=False)(question1)
+    q1 = Bidirectional(LSTM(SENT_EMBEDDING_DIM, return_sequences=True), merge_mode="sum")(q1)
+
+    q2 = Embedding(WORDS_NUM + 1, WORD_EMBEDDING_DIM, weights=[wem],
+                   input_length=MAX_WSEQ_LEN,
+                   trainable=False)(question2)
+    q2 = Bidirectional(LSTM(SENT_EMBEDDING_DIM, return_sequences=True), merge_mode="sum")(q2)
+
+    attention = dot([q1, q2], [1, 1])
+    attention = Flatten()(attention)
+    attention = Dense((MAX_WSEQ_LEN* SENT_EMBEDDING_DIM))(attention)
+    attention = Reshape((MAX_WSEQ_LEN, SENT_EMBEDDING_DIM))(attention)
+
+    merged = add([q1,attention])
+    merged = Flatten()(merged)
+    merged = Dense(200, activation='relu')(merged)
+    merged = Dropout(DROPOUT)(merged)
+    merged = BatchNormalization()(merged)
+    merged = Dense(200, activation='relu')(merged)
+    merged = Dropout(DROPOUT)(merged)
+    merged = BatchNormalization()(merged)
+    merged = Dense(200, activation='relu')(merged)
+    merged = Dropout(DROPOUT)(merged)
+    merged = BatchNormalization()(merged)
+    merged = Dense(200, activation='relu')(merged)
+    merged = Dropout(DROPOUT)(merged)
+    merged = BatchNormalization()(merged)
+
+    is_duplicate = Dense(1, activation='sigmoid')(merged)
+
+    model = Model(inputs=[question1, question2], outputs=is_duplicate)
+    model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
+    return model
+
+
 if __name__ == "__main__":
-    model_wem = MODEL_WEM()
-    print(model_wem.summary())
+    # model = MODEL_WEM()
+    model = MODEL_WEM_ATTENTION()
+    print(model.summary())
