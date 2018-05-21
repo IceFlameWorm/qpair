@@ -1,6 +1,6 @@
 import os
 
-DATA_SET_PATH = "/root/mounted/datasets/contest_data/"
+DATA_SET_PATH = "/root/mounted/datasets/data_0515/"
 KN_CSV = os.path.join(DATA_SET_PATH, "knowledge.csv")
 TRAIN_CSV = os.path.join(DATA_SET_PATH, "train.csv")
 TEST_CSV = os.path.join(DATA_SET_PATH, "test.csv")

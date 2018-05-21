@@ -1,4 +1,9 @@
-def add_wv_to_test(test_df, qs, w2i, c2i):
+from config import *
+import pandas as pd
+import numpy as np
+from keras.preprocessing.sequence import pad_sequences
+
+def add_wv_to_qpairs(test_df, qs, w2i, c2i):
     
     def words2ids(item):
         return np.array(list(map(lambda x: w2i[x],item.split())))
