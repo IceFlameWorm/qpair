@@ -15,7 +15,7 @@ from sklearn.model_selection import train_test_split
 from config import * # 在导入 baselines之前，需要在外部添加搜索路径 <project path>
 
 def MODEL_WEM():
-    DROPOUT = 0.1
+    DROPOUT = 0.6
 
 
     with open(WEM_PKL, 'rb') as f:
