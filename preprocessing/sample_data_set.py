@@ -1,4 +1,4 @@
-import numpuy as np
+import numpy as np
 from collections import defaultdict
 import pandas as pd
 
@@ -24,7 +24,7 @@ def sample_data_set(all_pairs, target_rate, sampling_number, random_state = None
     return pd.concat([pos_sampled, neg_sampled], ignore_index=True)
 
 
-def q1_q2_intersect(data, q1, q2):
+def q1_q2_intersect(data, q1='q1', q2='q2'):
     q_dict = defaultdict(set)
     for i in range(data.shape[0]):
         q_dict[data[q1][i]].add(data[q2][i])
