@@ -1,6 +1,7 @@
 import numpy as np
 from collections import defaultdict
 import pandas as pd
+from sklearn.utils import shuffle
 
 Q1_Q2_INTERSECT = 'q1_q2_intersect'
 
@@ -83,5 +84,7 @@ def train_test_split(data_set, test_target_rate, split_rate = 0.2, random_state 
     if drop_intersect:
         sampled_train.drop(Q1_Q2_INTERSECT, axis = 1, inplace = True)
         sampled_test.drop(Q1_Q2_INTERSECT, axis = 1, inplace = True)
-        
+
+    sampled_train = shuffle(sampled_train).reset_index(drop=True)
+    sampled_test = shuffle(sampled_test).reset_index(drop=True)
     return sampled_train, sampled_test

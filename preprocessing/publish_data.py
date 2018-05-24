@@ -182,7 +182,8 @@ def main():
         _, fn = os.path.split(f)
         shutil.copyfile(f, os.path.join(PUBLISH_FRONT_END, fn))
 
+    print("Done")
+
 
 if __name__ == '__main__':
-    res = main()
-    print(res)
+    main()
