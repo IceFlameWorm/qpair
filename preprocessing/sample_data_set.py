@@ -78,7 +78,7 @@ def train_test_split(data_set, test_target_rate, split_rate = 0.2, random_state 
         
     data_set_copy = data_set.copy()
     data_set_copy[Q1_Q2_INTERSECT] = q1_q2_intersect(data_set_copy, q1, q2)
-    sampled_test, sampled_train = split_test_train_set(data_set, test_target_rate, split_rate, label)
+    sampled_test, sampled_train = split_test_train_set(data_set_copy, test_target_rate, split_rate, label)
     
     if drop_intersect:
         sampled_train.drop(Q1_Q2_INTERSECT, axis = 1, inplace = True)
