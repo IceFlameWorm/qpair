@@ -19,9 +19,26 @@ def sample_data_set(all_pairs, target_rate, sampling_number, random_state = None
     
     pos_pairs = all_pairs[all_pairs[label] == 1]
     neg_pairs = all_pairs[all_pairs[label] == 0]
+
+    pos_pairs_total = len(pos_pairs)
+    neg_pairs_total = len(neg_pairs)
+
+    if pos_num <= pos_pairs_total and neg_num <= neg_pairs_total:
+        pos_sample_num = pos_num
+        neg_sample_num = neg_num
+
+    if pos_num > pos_pairs_total:
+        print('Warning: the data set has no enough pos samples, the total sampling number will be less than "sampling_number"')
+        pos_sample_num = pos_pairs_total
+        neg_sample_num = int(pos_sample_num * (1 / target_rate - 1))
+
+    if neg_num > neg_pairs_total:
+        print('Warning: the data set has no enough neg samples, the total sampling number will be less than "sampling_number"')
+        neg_sample_num = neg_pairs_total
+        pos_sample_num = int(neg_sample_num * target_rate / (1 - target_rate) )
     
-    pos_sampled = sample(pos_pairs, pos_num)[0]
-    neg_sampled = sample(neg_pairs, neg_num)[0]
+    pos_sampled = sample(pos_pairs, pos_sample_num)[0]
+    neg_sampled = sample(neg_pairs, pos_sample_num)[0]
     return pd.concat([pos_sampled, neg_sampled], ignore_index=True)
 
 
