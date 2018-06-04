@@ -26,7 +26,7 @@ def neighbours(data, q1, q2):
     return q_dict
 
 
-def q1_q2_intersect(data, q1, q2, q_dict):
+def check_q1_q2_intersect(data, q1, q2, q_dict):
 
     def intersect(row):
         return(len(set(q_dict[row[q1]]).intersection(set(q_dict[row[q2]]))))
@@ -59,8 +59,8 @@ def main():
     test['q1_freq'] = q_freq(test, KN_TRAIN_TEST_PAIRS.q1, qs_counter)
     test['q2_freq'] = q_freq(test, KN_TRAIN_TEST_PAIRS.q2, qs_counter)
     print("分别给训练集和测试集添加Q1_Q2_INTERSECT...")
-    train[Q1_Q2_INTERSECT] = q1_q2_intersect(train, KN_TRAIN_TEST_PAIRS.q1, KN_TRAIN_TEST_PAIRS.q2, qn_dict)
-    test[Q1_Q2_INTERSECT] = q1_q2_intersect(test, KN_TRAIN_TEST_PAIRS.q1, KN_TRAIN_TEST_PAIRS.q2, qn_dict)
+    train[Q1_Q2_INTERSECT] = check_q1_q2_intersect(train, KN_TRAIN_TEST_PAIRS.q1, KN_TRAIN_TEST_PAIRS.q2, qn_dict)
+    test[Q1_Q2_INTERSECT] = check_q1_q2_intersect(test, KN_TRAIN_TEST_PAIRS.q1, KN_TRAIN_TEST_PAIRS.q2, qn_dict)
 
     # 分别计算两个magicfeature在训练集和测试集的相关性
     print(train.head())
