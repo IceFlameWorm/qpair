@@ -21,7 +21,7 @@ def neighbours(data, q1, q2):
     q_dict = defaultdict(set)
     for i in range(data.shape[0]):
         q_dict[data[q1][i]].add(data[q2][i])
-        q_dict[data[q1][i]].add(data[q2][i])
+        q_dict[data[q2][i]].add(data[q1][i])
 
     return q_dict
 
@@ -63,10 +63,15 @@ def main():
     test[Q1_Q2_INTERSECT] = check_q1_q2_intersect(test, KN_TRAIN_TEST_PAIRS.q1, KN_TRAIN_TEST_PAIRS.q2, qn_dict)
 
     # 分别计算两个magicfeature在训练集和测试集的相关性
-    print(train.head())
-    print(test.head())
-    print(train.corr())
-    print(test.corr())
+    print("train head: \n", train.head())
+    print("test head: \n", test.head())
+    print("train corr: \n", train.corr())
+    print("test corr: \n", test.corr())
+    print("train intersect pos: \n", train.groupby(Q1_Q2_INTERSECT)['label'].sum(), "train intersect all: \n", train.groupby(Q1_Q2_INTERSECT)['label'].count())
+    print("test intersect pos: \n", test.groupby(Q1_Q2_INTERSECT)['label'].sum(), "test intersect all: \n", test.groupby(Q1_Q2_INTERSECT)['label'].count())
+    print("train target rate:\n", train.label.sum() / train.label.count())
+    print("test target rate: \n", test.label.sum() / test.label.count())
+    print("test score rate: \n", test_label.is_preliminary.sum() / test_label.is_preliminary.count())
 
 if __name__ == '__main__':
     main()

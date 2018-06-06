@@ -7,16 +7,16 @@ import shutil
 from sample_data_set import *
 
 # 配置
-RAW_DATA_SET_PATH = "/root/mounted/datasets/raw_data/"
+RAW_DATA_SET_PATH = "/root/mounted/datasets/raw_data_0606/"
 KN_PAIRS_CSV = os.path.join(RAW_DATA_SET_PATH, "knowledge_pairs.csv")
 TRAIN_PAIRS_CSV = os.path.join(RAW_DATA_SET_PATH, "train_pairs.csv")
-TEST_PAIRS_CSV = os.path.join(RAW_DATA_SET_PATH, 'test0515.csv')
+TEST_PAIRS_CSV = os.path.join(RAW_DATA_SET_PATH, 'test_all.csv')
 NEED_COPY_PATH = os.path.join(RAW_DATA_SET_PATH, 'need_copy')
 CHAR_EM_TXT = os.path.join(NEED_COPY_PATH, "char_embed.txt")
 WORD_EM_TXT = os.path.join(NEED_COPY_PATH, "word_embed.txt")
 QUESTION_CSV = os.path.join(NEED_COPY_PATH, "question.csv")
 
-PUBLISH_PATH = "/root/mounted/datasets/publish"
+PUBLISH_PATH = "/root/mounted/datasets/publish_0606_tr50/"
 PUBLISH_FRONT_END = os.path.join(PUBLISH_PATH, 'frontend')
 PUBLISH_BACK_END = os.path.join(PUBLISH_PATH, 'backend')
 PUBLISH_TRAIN_CSV = os.path.join(PUBLISH_FRONT_END, 'train.csv')
@@ -24,14 +24,14 @@ PUBLISH_TEST_CSV = os.path.join(PUBLISH_FRONT_END, 'test.csv')
 PUBLISH_TEST_LABEL_CSV = os.path.join(PUBLISH_BACK_END, 'test_label.csv')
 
 KN_TRAIN_SAMPLE_SEED = None
-KN_TRAIN_SAMPLE_TARGET_RATE = 0.3
+KN_TRAIN_SAMPLE_TARGET_RATE = 0.45
 KN_TRAIN_SAMPLE_NUM = 200000
 
-SPLIT_RATE = 0.2
-SPLIT_TEST_TARGET_RATE = 0.3
+SPLIT_RATE = 0.25
+SPLIT_TEST_TARGET_RATE = 0.5
 SPLIT_SEED = None
 
-SCORE_RATE = 0.5
+SCORE_RATE = 0.375
 SCORE_SEED = None
 
 class KN_PAIRS(object):
@@ -127,6 +127,7 @@ def main():
     train_pairs = pd.read_csv(TRAIN_PAIRS_CSV, sep=TRAIN_PAIRS.sep)
     kn_train_pairs = combine_kn_train(kn_pairs, train_pairs)
 
+    print("kn_train_pairs num: \n", len(kn_train_pairs))
     # kn_train采样
     print("正在对kn_train进行采样...")
     kn_train_pairs_sampled = sample_data_set(kn_train_pairs,
@@ -135,10 +136,13 @@ def main():
                                              KN_TRAIN_SAMPLE_SEED,
                                              KN_TRAIN_PAIRS.label)
 
+    print('kn_train_pairs_sampled num: \n', len(kn_train_pairs_sampled))
     # kn_train_sampled test整合
     print("正在整合kn_train_sampled与test...")
     test_pairs = pd.read_csv(TEST_PAIRS_CSV, sep = TEST_PAIRS.sep)
     kn_train_test_pairs = combine_kn_train_test(kn_train_pairs_sampled, test_pairs)
+
+    print('kn_train_test_pairs: \n', len(kn_train_test_pairs))
 
     # 基于kn_train_test_sampled划分训练集和测试集 （shuffle?）
     print("正在从kn_train_test划分训练集和测试集...")
@@ -151,6 +155,8 @@ def main():
                                    KN_TRAIN_TEST_PAIRS.q2,
                                    KN_TRAIN_TEST_PAIRS.label)
 
+    print("train num: \n", len(train))
+    print("test num: \n", len(test))
     if not os.path.exists(PUBLISH_PATH):
         os.mkdir(PUBLISH_PATH)
 
