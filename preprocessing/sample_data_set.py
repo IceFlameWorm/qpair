@@ -38,7 +38,7 @@ def sample_data_set(all_pairs, target_rate, sampling_number, random_state = None
         pos_sample_num = int(neg_sample_num * target_rate / (1 - target_rate) )
     
     pos_sampled = sample(pos_pairs, pos_sample_num)[0]
-    neg_sampled = sample(neg_pairs, pos_sample_num)[0]
+    neg_sampled = sample(neg_pairs, neg_sample_num)[0]
     return pd.concat([pos_sampled, neg_sampled], ignore_index=True)
 
 
@@ -46,7 +46,7 @@ def q1_q2_intersect(data, q1='q1', q2='q2'):
     q_dict = defaultdict(set)
     for i in range(data.shape[0]):
         q_dict[data[q1][i]].add(data[q2][i])
-        q_dict[data[q1][i]].add(data[q2][i])
+        q_dict[data[q2][i]].add(data[q1][i])
     
     def intersect(row):
         return(len(set(q_dict[row[q1]]).intersection(set(q_dict[row[q2]]))))
