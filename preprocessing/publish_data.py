@@ -3,6 +3,8 @@ import pandas as pd
 import numpy as np
 import glob
 import shutil
+import random
+from collections import defaultdict
 
 from sample_data_set import *
 
@@ -16,7 +18,7 @@ CHAR_EM_TXT = os.path.join(NEED_COPY_PATH, "char_embed.txt")
 WORD_EM_TXT = os.path.join(NEED_COPY_PATH, "word_embed.txt")
 QUESTION_CSV = os.path.join(NEED_COPY_PATH, "question.csv")
 
-PUBLISH_PATH = "/root/mounted/datasets/publish_0606_tr50/"
+PUBLISH_PATH = "/root/mounted/datasets/publish_0606_tr50_test/"
 PUBLISH_FRONT_END = os.path.join(PUBLISH_PATH, 'frontend')
 PUBLISH_BACK_END = os.path.join(PUBLISH_PATH, 'backend')
 PUBLISH_TRAIN_CSV = os.path.join(PUBLISH_FRONT_END, 'train.csv')
@@ -120,6 +122,38 @@ def make_score_file(test_labels, pre_rate=0.5, random_state=None):
     return pd.DataFrame(np.hstack([test_labels.reshape(-1, 1), ones_zeros_perm.reshape(-1, 1)]),
                         columns=['y_true', 'is_preliminary'])
 
+def shuffle_q1_q2(data):
+    q1 = data[KN_TRAIN_TEST_PAIRS.q1]
+    q2 = data[KN_TRAIN_TEST_PAIRS.q2]
+    q1_q2_zip = zip(q1, q2)
+
+    def shuffle(q1_q2):
+        q1, q2 = q1_q2
+        return (q1, q2) if random.uniform(0,1) <=0.5 else (q2, q1)
+
+    return pd.DataFrame(list(map(shuffle, q1_q2_zip)), columns=[KN_TRAIN_TEST_PAIRS.q1, KN_TRAIN_TEST_PAIRS.q2])
+
+
+# 测试用##########################
+def neighbours(data, q1, q2):
+    q_dict = defaultdict(set)
+    for i in range(data.shape[0]):
+        q_dict[data[q1][i]].add(data[q2][i])
+        q_dict[data[q2][i]].add(data[q1][i])
+
+    return q_dict
+
+
+def check_q1_q2_intersect(data, q1, q2, q_dict):
+
+    def intersect(row):
+        return(len(set(q_dict[row[q1]]).intersection(set(q_dict[row[q2]]))))
+
+    return data.apply(intersect, axis = 1)
+############################################
+
+
+
 def main():
     # kn train整合
     print("正在整合kn与train...")
@@ -157,6 +191,26 @@ def main():
 
     print("train num: \n", len(train))
     print("test num: \n", len(test))
+
+    # train, test, 随机更换q1， q2的顺序
+    print("更换train test中q1和q2的顺序")
+    train[[KN_TRAIN_TEST_PAIRS.q1, KN_TRAIN_TEST_PAIRS.q2]] = shuffle_q1_q2(train)
+    test[[KN_TRAIN_TEST_PAIRS.q1, KN_TRAIN_TEST_PAIRS.q2]] = shuffle_q1_q2(test)
+
+    # # 测试用 ########################
+    # print("丢弃训练集中intersecttion大于测试集的样本")
+    # train_test = pd.concat([train, test], ignore_index=True)
+    # qn_dict = neighbours(train_test, KN_TRAIN_TEST_PAIRS.q1, KN_TRAIN_TEST_PAIRS.q2)
+    # train[Q1_Q2_INTERSECT] = check_q1_q2_intersect(train, KN_TRAIN_TEST_PAIRS.q1, KN_TRAIN_TEST_PAIRS.q2, qn_dict)
+    # test[Q1_Q2_INTERSECT] = check_q1_q2_intersect(test, KN_TRAIN_TEST_PAIRS.q1, KN_TRAIN_TEST_PAIRS.q2, qn_dict)
+    # test_inter_max = test[Q1_Q2_INTERSECT].max()
+    # train = train[train[Q1_Q2_INTERSECT] <= test_inter_max]
+    # train.drop(labels = Q1_Q2_INTERSECT, axis = 1, inplace = True)
+    # test.drop(labels = Q1_Q2_INTERSECT, axis = 1, inplace = True)
+    # print("train num after drop: \n", len(train))
+    # print("test num: \n", len(test))
+    # # ###############################
+
     if not os.path.exists(PUBLISH_PATH):
         os.mkdir(PUBLISH_PATH)
 
