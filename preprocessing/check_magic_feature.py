@@ -34,6 +34,7 @@ def check_q1_q2_intersect(data, q1, q2, q_dict):
     return data.apply(intersect, axis = 1)
 
 
+
 def main():
     # 加载训练集、测试集、打分文件
     print("读取train.csv, test.csv, test_label.csv...")
@@ -52,6 +53,11 @@ def main():
     qs_counter = freq(train_test, KN_TRAIN_TEST_PAIRS.q1, KN_TRAIN_TEST_PAIRS.q2)
     qn_dict = neighbours(train_test, KN_TRAIN_TEST_PAIRS.q1, KN_TRAIN_TEST_PAIRS.q2)
 
+    # # 随机更换q1和q2的顺序
+    # print("随机更换q1和q2的顺序")
+    # train[[KN_TRAIN_TEST_PAIRS.q1, KN_TRAIN_TEST_PAIRS.q2]] = shuffle_q1_q2(train)
+    # test[[KN_TRAIN_TEST_PAIRS.q1, KN_TRAIN_TEST_PAIRS.q2]] = shuffle_q1_q2(test)
+
     # 训练集和测试集分别添加freq列和intersect列
     print("分别给训练集和测试集添加q1_freq和q2_freq...")
     train['q1_freq'] = q_freq(train, KN_TRAIN_TEST_PAIRS.q1, qs_counter)
@@ -61,6 +67,7 @@ def main():
     print("分别给训练集和测试集添加Q1_Q2_INTERSECT...")
     train[Q1_Q2_INTERSECT] = check_q1_q2_intersect(train, KN_TRAIN_TEST_PAIRS.q1, KN_TRAIN_TEST_PAIRS.q2, qn_dict)
     test[Q1_Q2_INTERSECT] = check_q1_q2_intersect(test, KN_TRAIN_TEST_PAIRS.q1, KN_TRAIN_TEST_PAIRS.q2, qn_dict)
+    test_label_pr = test_label[test_label.is_preliminary == 1]
 
     # 分别计算两个magicfeature在训练集和测试集的相关性
     print("train head: \n", train.head())
@@ -72,6 +79,7 @@ def main():
     print("train target rate:\n", train.label.sum() / train.label.count())
     print("test target rate: \n", test.label.sum() / test.label.count())
     print("test score rate: \n", test_label.is_preliminary.sum() / test_label.is_preliminary.count())
+    print('test_label_pr target rate: \n', test_label_pr.y_true.sum() / test_label_pr.y_true.count())
 
 if __name__ == '__main__':
     main()
